@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" modified="2026-06-04" agent="5.0" version="20.3.0" etag="abc123" type="device">
+  <diagram name="Enhanced RBAC Flow" id="diagram1">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="2000" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- LAYER 1: EVENT DETECTION -->
+        <mxCell id="layer1_bg" value="LAYER 1: EVENT DETECTION" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#999999;strokeWidth=2;fontSize=14;fontStyle=bold;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="800" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- SetIamPolicy Change Detected -->
+        <mxCell id="event_box" value="SetIamPolicy Change Detected&#xa;(UDP groups/users only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F4F8;strokeColor=#0066cc;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="500" y="100" width="400" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow down -->
+        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="event_box" target="eventarc">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Eventarc Trigger - GCP Icon Style -->
+        <mxCell id="eventarc" value="🔔 Eventarc Trigger&#xa;(Filters UDP events)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FF9800;strokeColor=#E65100;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="190" width="400" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow down -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="eventarc" target="layer2_bg">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- LAYER 2: EVENT PROCESSING (Pub/Sub) -->
+        <mxCell id="layer2_bg" value="LAYER 2: EVENT PROCESSING (Pub/Sub)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#999999;strokeWidth=2;fontSize=14;fontStyle=bold;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="300" width="800" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Pub/Sub Topic -->
+        <mxCell id="pubsub" value="📨 Pub/Sub Topic&#xa;rbac-iam-policy-changes&#xa;(Message deduplication enabled)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4285F4;strokeColor=#1a73e8;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="380" width="400" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow down -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="pubsub" target="layer3_bg">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- LAYER 3: CLOUD RUN WORKER -->
+        <mxCell id="layer3_bg" value="LAYER 3: CLOUD RUN WORKER (Enhanced IAM Sync Service)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#999999;strokeWidth=2;fontSize=14;fontStyle=bold;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="500" width="800" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Parse Message -->
+        <mxCell id="step1" value="1️⃣ Parse Message" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EA4335;strokeColor=#c5221f;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="580" width="400" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step1" target="step2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Extract IAM Changes -->
+        <mxCell id="step2" value="2️⃣ Extract IAM Changes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EA4335;strokeColor=#c5221f;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="660" width="400" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step2" target="step3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Validate Payload -->
+        <mxCell id="step3" value="3️⃣ Validate Payload&#xa;Missing data? → Fetch from IAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EA4335;strokeColor=#c5221f;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="740" width="400" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step3" target="step4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Apply RBAC with Retry -->
+        <mxCell id="step4" value="4️⃣ Apply RBAC to Airflow&#xa;WITH RETRY MECHANISM:&#xa;• Attempt 1 (immediate)&#xa;• Attempt 2 (2 sec delay)&#xa;• Attempt 3 (4 sec delay)&#xa;• Attempt 4 (8 sec delay)&#xa;• Attempt 5 (16 sec delay)&#xa;Max Retries: 5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EA4335;strokeColor=#c5221f;strokeWidth=2;fontColor=#ffffff;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="500" y="830" width="400" height="110" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="step4" target="success_decision">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Success Decision Diamond -->
+        <mxCell id="success_decision" value="Success?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FBBC04;strokeColor=#f57c00;strokeWidth=2;align=center;" vertex="1" parent="1">
+          <mxGeometry x="575" y="980" width="250" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- Yes path - ACK -->
+        <mxCell id="ack_box" value="✅ ACK Message&#xa;from DLQ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#34A853;strokeColor=#137333;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="350" y="1110" width="280" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- Yes Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;label=Yes;" edge="1" parent="1" source="success_decision" target="ack_box">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- No path - Send to DLQ -->
+        <mxCell id="dlq_send" value="❌ After 5 retries&#xa;(failure) → Send to DLQ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EA4335;strokeColor=#c5221f;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="770" y="1110" width="280" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- No Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;label=No;" edge="1" parent="1" source="success_decision" target="dlq_send">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow from DLQ send -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="dlq_send" target="dlq_topic">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Dead Letter Queue Topic -->
+        <mxCell id="dlq_topic" value="📨 Pub/Sub Topic&#xa;rbac-sync-dead-letters&#xa;(Failed messages for analysis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4285F4;strokeColor=#1a73e8;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="770" y="1200" width="280" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- LAYER 4: DAILY SCHEDULED AUDIT -->
+        <mxCell id="layer4_bg" value="LAYER 4: DAILY SCHEDULED AUDIT (Reconciliation &amp; State Validation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#999999;strokeWidth=2;fontSize=14;fontStyle=bold;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="1350" width="800" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Cloud Scheduler -->
+        <mxCell id="scheduler" value="⏰ Cloud Scheduler&#xa;Daily Trigger&#xa;(e.g., 2 AM UTC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9C27B0;strokeColor=#6a1b9a;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1430" width="400" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="scheduler" target="audit_service">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Audit Service -->
+        <mxCell id="audit_service" value="🔍 Audit Service (Cloud Run)&#xa;1. Fetch all IAM groups/users (UDP prefix)&#xa;2. Fetch all Airflow roles/users&#xa;3. Compare mappings&#xa;4. Identify inconsistencies&#xa;5. Apply corrections&#xa;6. Generate audit report" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00BCD4;strokeColor=#00838f;strokeWidth=2;fontColor=#ffffff;align=center;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1530" width="400" height="110" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrow -->
+        <mxCell style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="audit_service" target="audit_topic">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Audit Reports Topic -->
+        <mxCell id="audit_topic" value="📨 Pub/Sub Topic&#xa;rbac-daily-audit-reports&#xa;(Results for monitoring/alerting)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4285F4;strokeColor=#1a73e8;strokeWidth=2;fontColor=#ffffff;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="1670" width="400" height="80" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
